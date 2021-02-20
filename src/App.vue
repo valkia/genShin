@@ -2,7 +2,7 @@
   <Calculator/>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Calculator from './components/Calculator.vue'
 
 // This starter template is using Vue 3 experimental <script setup> SFCs
