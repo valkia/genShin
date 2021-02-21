@@ -9,6 +9,7 @@
   "dependencies": {
     "@vue/cli-service": "^4.5.11",
     "element-plus": "^1.0.2-beta.32",
+    "genshin_panel": "^2.1.0",
     "vue": "^3.0.5",
     "xlsx": "^0.16.9"
   },
