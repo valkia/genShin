@@ -221,7 +221,7 @@
                                   <el-input-number v-model="num" @change="handleChange" ></el-input-number>
                               </el-form-item>-->
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit">查询</el-button>
+                        <el-button type="primary" @click="startCal">计算</el-button>
                     </el-form-item>
                 </el-form>
             </el-col>
@@ -303,6 +303,7 @@
                 <div style="margin-top: 20px">
                     <el-checkbox :value="false">根据不同的人物面板计算最优</el-checkbox>
                 </div>
+                <Config @select="selectConfig"></Config>
             </el-col>
         </el-row>
         <div style="margin-top: 100px"></div>
@@ -314,14 +315,14 @@
     import XLSX from "xlsx";
 
     import {defineProps, reactive, ref, computed} from "vue";
-
-    import {secondaryTags} from '../assets/tags/index'
+    import Config from './Config.vue';
+    import {secondaryTags as SecondaryTagName} from '../assets/tags/index'
     import {artifactsTagMap, artifactsSecondaryTag} from '../assets/artifacts/index'
 
     console.log('create')
-    console.log(secondaryTags)
 
     import * as genshin from "genshin_panel";
+    import compute from "../algorithms/compute_artifacts_promise";
 
     // 刻晴，80级，已突破，0命之座
     // 可以使用中文或英文
@@ -350,6 +351,13 @@
         .build()
     ;
     console.log(attribute1)
+
+    let selectedConfig = ref({mode: "any"})
+
+    const selectConfig = (row: any) => {
+        console.log(row)
+        selectedConfig.value = row
+    }
 
     type ArtifactSetName
         = "archaicPetra"               // 悠古的磐岩
@@ -441,13 +449,23 @@
             } else {
                 key = ('固定' + key) as TagChnName
             }
-            return listTag[key]
+            return listTag[key] as SecondaryTagName
         } else {
-            return listTag[key]
+            return listTag[key] as SecondaryTagName
         }
 
     }
-
+    const valueChange = (value: string | number) => {
+        if ((value + "").indexOf("%") > -1) {
+            value = value + ""
+            value.replace("%", "")
+            value = Number(value) / 100
+            return value
+        } else {
+            value = Number(value)
+            return value
+        }
+    }
     type ArtifactChnName =
         "悠古的磐岩" |
         "沉沦之心" |
@@ -481,58 +499,139 @@
         "祭火之人" |
         "祭水之人"
 
+    const artifactNameMap = {
+        "悠古的磐岩": "archaicPetra",
+        "沉沦之心": "heartOfDepth",
+        "冰风迷途的勇士": "blizzardStrayer",
+        "逆飞的流星": "retracingBolide",
+        "昔日宗室之仪": "noblesseOblige",
+        "角斗士的终幕礼": "gladiatorFinale",
+        "被怜爱的少女": "maidenBeloved",
+        "翠绿之影": "viridescentVenerer",
+        "渡过烈火的贤人": "lavaWalker",
+        "炽烈的炎之魔女": "crimsonWitch",
+        "平息雷鸣的尊者": "thunderSmoother",
+        "如雷的盛怒": "thunderingFury",
+        "染血的骑士道": "bloodstainedChivalry",
+        "流浪大地的乐团": "wandererTroupe",
+        "学士": "scholar",
+        "赌徒": "gambler",
+        "奇迹": "tinyMiracle",
+        "武人": "martialArtist",
+        "勇士之心": "braveHeart",
+        "行者之心": "resolutionOfSojourner",
+        "守护之心": "defenderWill",
+        "战狂": "berserker",
+        "教官": "instructor",
+        "流放者": "exile",
+        "冒险家": "adventurer",
+        "幸运儿": "luckyDog",
+        "游医": "travelingDoctor",
+        "祭雷之人": "prayersForWisdom",
+        "祭冰之人": "prayersToSpringtime",
+        "祭火之人": "prayersForIllumination",
+        "祭水之人": "prayersForDestiny",
+    }
 
     //标签 excel格式 转化成 面板计算器格式
     const artifactNameChange = (key: ArtifactChnName) => {
-        let nameList = {
-            "悠古的磐岩": "archaicPetra",
-            "沉沦之心": "heartOfDepth",
-            "冰风迷途的勇士": "blizzardStrayer",
-            "逆飞的流星": "retracingBolide",
-            "昔日宗室之仪": "noblesseOblige",
-            "角斗士的终幕礼": "gladiatorFinale",
-            "被怜爱的少女": "maidenBeloved",
-            "翠绿之影": "viridescentVenerer",
-            "渡过烈火的贤人": "lavaWalker",
-            "炽烈的炎之魔女": "crimsonWitch",
-            "平息雷鸣的尊者": "thunderSmoother",
-            "如雷的盛怒": "thunderingFury",
-            "染血的骑士道": "bloodstainedChivalry",
-            "流浪大地的乐团": "wandererTroupe",
-            "学士": "scholar",
-            "赌徒": "gambler",
-            "奇迹": "tinyMiracle",
-            "武人": "martialArtist",
-            "勇士之心": "braveHeart",
-            "行者之心": "resolutionOfSojourner",
-            "守护之心": "defenderWill",
-            "战狂": "berserker",
-            "教官": "instructor",
-            "流放者": "exile",
-            "冒险家": "adventurer",
-            "幸运儿": "luckyDog",
-            "游医": "travelingDoctor",
-            "祭雷之人": "prayersForWisdom",
-            "祭冰之人": "prayersToSpringtime",
-            "祭火之人": "prayersForIllumination",
-            "祭水之人": "prayersForDestiny",
-        }
-
-        return nameList[key]
+        return artifactNameMap[key] as ArtifactSetName
     }
+
 
     type PositionChnName = "生之花" | "死之羽" | "时之沙" | "空之杯" | "理之冠"
-
-    const positionNameChange = (key: PositionChnName) => {
-        let nameList = {
-            "生之花": "flower",
-            "死之羽": "feather",
-            "时之沙": "sand",
-            "空之杯": "cup",
-            "理之冠": "head",
-        }
-        return nameList[key]
+    type ArtifactTypeName = "flower" | "feather" | "sand" | "cup" | "head"
+    const positionNameMap = {
+        "生之花": "flower",
+        "死之羽": "feather",
+        "时之沙": "sand",
+        "空之杯": "cup",
+        "理之冠": "head",
     }
+    const positionNameChange = (key: PositionChnName) => {
+        return positionNameMap[key] as ArtifactTypeName
+    }
+
+    const getArtifacts = () => {
+        let list = JSON.parse(JSON.stringify(state.list))
+        let flower: any[] = [];
+        let feather: any[] = [];
+        let sand: any[] = [];
+        let cup: any[] = [];
+        let head: any[] = [];
+        list.map((item: any) => {
+            if (item['圣遗物类型'] === '生之花') {
+                flower.push(exchangeArtifacts('生之花', item))
+            } else if (item['圣遗物类型'] === '死之羽') {
+                feather.push(exchangeArtifacts('死之羽', item))
+            } else if (item['圣遗物类型'] === '时之沙') {
+                sand.push(exchangeArtifacts('时之沙', item))
+            } else if (item['圣遗物类型'] === '空之杯') {
+                cup.push(exchangeArtifacts('空之杯', item))
+            } else if (item['圣遗物类型'] === '理之冠') {
+                head.push(exchangeArtifacts('理之冠', item))
+            }
+        });
+
+        return {
+            flower,
+            feather,
+            sand,
+            cup,
+            head,
+        };
+    }
+
+    //转换格式
+    const exchangeArtifacts = (type: PositionChnName, item: any) => {
+        const key = item['所属套装']
+        const typeKey = item['圣遗物类型']
+        const tag0Key = item['主属性']
+        const tag0Value = item['主属性数值']
+        const tag1Key = item['副属性1']
+        const tag1Value = item['副属性1数值']
+        const tag2Key = item['副属性2']
+        const tag2Value = item['副属性2数值']
+        const tag3Key = item['副属性3']
+        const tag3Value = item['副属性3数值']
+        const tag4Key = item['副属性4']
+        const tag4Value = item['副属性4数值']
+        let art = new genshin.ArtifactBuilder()
+            .setName(artifactNameChange(key))      // 如雷的盛怒
+            .position(positionNameChange(typeKey))             // 生之花
+            .mainTag(tagChange(tag0Key, tag0Value), valueChange(tag0Value))
+            .tag(tagChange(tag1Key, tag1Value), valueChange(tag1Value))
+            .tag(tagChange(tag2Key, tag2Value), valueChange(tag2Value))
+            .tag(tagChange(tag3Key, tag3Value), valueChange(tag3Value))
+            .tag(tagChange(tag4Key, tag4Value), valueChange(tag4Value))
+            .build()
+        return art
+    }
+
+    const startCal = () => {
+        const character = keqing
+        const weapon = heijian
+
+        let artifacts = getArtifacts();
+        let checkFuncConfig = selectedConfig.value;
+        let targetFuncName = 'critical';
+
+        //this.calculating = true;
+
+        // this is a web worker wrapped by a promise
+        compute(artifacts, character, weapon, targetFuncName, checkFuncConfig).then(result => {
+            this.resultData = {
+                artifacts: Object.values(result.combo),
+                value: result.value,
+                attribute: result.attribute,
+                error: result.error,
+            };
+            this.calculating = false;
+        }).catch(reason => {
+            console.log(reason)
+        })
+    }
+
 
     const activities = [
         {
