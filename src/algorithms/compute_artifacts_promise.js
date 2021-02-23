@@ -1,4 +1,3 @@
-
 import computeArtifacts from './compute_artifacts'
 
 export default function (artifacts, character, weapon, targetFuncName, checkFuncConfig) {
@@ -9,7 +8,12 @@ export default function (artifacts, character, weapon, targetFuncName, checkFunc
         console.log(targetFuncName)
         console.log(checkFuncConfig)
 
-        let res = computeArtifacts(artifacts, character, weapon, targetFuncName, checkFuncConfig)
-        console.log(res)
+        try {
+            let res = computeArtifacts(artifacts, character, weapon, targetFuncName, checkFuncConfig)
+            resolve(res)
+        } catch (e) {
+            console.error(e)
+            reject(e)
+        }
     });
 }

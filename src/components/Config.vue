@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h3 class="title">圣遗物套装（计算结果将限定在套装之内）</h3>
-        <div>
+
+        <div style="    text-align: left;">
             <div class="row">
                 <el-radio
                         v-model="artifactMode"
@@ -24,7 +24,7 @@
                     ></el-option>
                 </el-select>
             </div>
-            <div class="row">
+            <div class="row" >
                 <el-radio v-model="artifactMode" label="22" class="radio">2+2</el-radio>
                 <el-select
                         :disabled="artifactMode !== '22'"
@@ -65,7 +65,7 @@
                 </el-select>
             </div>
         </div>
-        <el-button type="primary" class="confirm-button" @click="handleConfirm">确定</el-button>
+        <el-button type="primary" class="confirm-button" @click="handleConfirm">计算</el-button>
     </div>
 </template>
 
