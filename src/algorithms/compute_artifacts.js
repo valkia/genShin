@@ -1,5 +1,5 @@
 import * as genshin from "genshin_panel";
-import { targetFunctionsData } from "../asset/target_functions";
+//import {targetFunctionsData} from "../asset/target_functions";
 import createCheckFunction from "./create_check_function";
 import badge from "../assets/target_functions/data/common/badges/sword.png";
 
@@ -12,20 +12,24 @@ function critical(attribute) {
 
 
 function getArtifact(myArtifact) {
+    console.log(myArtifact)
+
+
     let temp = new genshin.ArtifactBuilder()
         .setName(myArtifact.setName)
         .position(myArtifact.position)
-        .mainTag(myArtifact.mainTag.name, myArtifact.mainTag.value)
+        .mainTag(Object.entries(myArtifact.tag1)[0], Object.entries(myArtifact.tag1)[1])
     ;
-
-    for (let tag of myArtifact.normalTags) {
-        temp.tag(tag.name, tag.value);
+//myArtifact.mainTag.name, myArtifact.mainTag.value
+    for (let tag of Object.entries(myArtifact.tag2)) {
+        temp.tag(Object.entries(tag)[0], Object.entries(tag)[1]);
     }
 
     return temp.build();
 }
 
 function computeArtifacts(artifacts, c, w, targetFuncName, checkFuncConfig) {
+    console.log(`computeArtifacts`);
     const character = new genshin.Character(c.name, c.level, c.ascend, 0);
     const weapon = new genshin.Weapon(w.name, w.level, w.ascend, w.refine);
     //const targetFunc = targetFunctionsData[targetFuncName].func;

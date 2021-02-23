@@ -1,10 +1,12 @@
-import computeArtifacts from "./compute_artifacts";
-
+console.log('computeArtifacts')
+import computeArtifacts from "./compute_artifacts.js";
+console.log(computeArtifacts)
 const calcs = {
     computeArtifacts,
 };
 
 self.addEventListener("message", event => {
+    console.log(`message`);
     let method = calcs[event.data.method];
 
     if (method) {
