@@ -262,7 +262,7 @@
             </el-table-column>
         </el-table>
         <el-row class="bottom-wrap">
-            <el-col :span="8">
+            <el-col :span="8" style="text-align: left;">
                 说明： 暂时只有主属性过滤和部分属性排序功能<br/><br/>
                 excel来源见
                 <a
@@ -273,6 +273,10 @@
                 github地址
                 <a href="https://github.com/valkia/genShin" target="_blank"
                 >https://github.com/valkia/genShin</a
+                ><br/><br/>
+                计算算法来源
+                <a href="https://github.com/wormtql/genshin_panel" target="_blank"
+                >https://github.com/wormtql/genshin_panel</a
                 >
             </el-col>
             <el-col :span="8" style="padding: 0 80px">
@@ -290,18 +294,23 @@
             <el-col :span="8">
                 <div>后续计划</div>
                 <div style="margin-top: 20px">
-                    <el-checkbox :value="false">根据所选4件套装计算最优</el-checkbox>
+                    <el-checkbox v-model="checked" >根据所选4件套装计算最优</el-checkbox>
                 </div>
                 <div style="margin-top: 20px">
-                    <el-checkbox :value="false">根据 2+2 套装计算最优</el-checkbox>
+                    <el-checkbox v-model="checked">根据 2+2 套装计算最优</el-checkbox>
                 </div>
                 <div style="margin-top: 20px">
-                    <el-checkbox :value="false">引入图标</el-checkbox>
+                    <el-checkbox v-model="checked">引入图标</el-checkbox>
                 </div>
                 <div style="margin-top: 20px">
                     <el-checkbox :value="false">根据不同的人物面板计算最优</el-checkbox>
                 </div>
-
+                <div style="margin-top: 20px">
+                    <el-checkbox :value="false">记录上次excel内容</el-checkbox>
+                </div>
+                <div style="margin-top: 20px">
+                    <el-checkbox :value="false">通过json获取</el-checkbox>
+                </div>
             </el-col>
         </el-row>
         <el-dialog title="" v-model="showResultFlag">
@@ -327,6 +336,8 @@
     import * as genshin from "genshin_panel";
     import compute from "../algorithms/compute_artifacts_promise";
     import ResultPage from "./ResultPage.vue";
+
+    const checked = ref(true)
 
     // 刻晴，80级，已突破，0命之座
     // 可以使用中文或英文
@@ -627,6 +638,14 @@
 
 
     const activities = [
+        {
+            content: "引入图标",
+            timestamp: "2021-02-25",
+        },
+        {
+            content: "根据圣遗物套装计算",
+            timestamp: "2021-02-24",
+        },
         {
             content: "根据主属性过滤圣遗物",
             timestamp: "2021-02-19",

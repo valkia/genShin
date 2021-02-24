@@ -45,7 +45,7 @@
         }
 
         if (item[position]) {
-            return '.'+item[position].url;
+            return item[position].url;
         }
 
         throw "error no position";
